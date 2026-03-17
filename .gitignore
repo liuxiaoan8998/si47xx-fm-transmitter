@@ -1,0 +1,16 @@
+# 编译产物
+*.o
+*.out
+*.exe
+*.elf
+
+# 可执行文件
+test_with_lcd
+
+# 临时文件
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
