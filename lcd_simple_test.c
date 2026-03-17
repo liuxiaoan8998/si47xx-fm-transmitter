@@ -39,33 +39,6 @@ extern void LCD_dispnum(char number);  // 显示单个数字 '0'-'9'
 #define TEST_OK             99
 
 /*============================================================================
- * LCD 显示函数
- *============================================================================*/
-
-/**
- * @brief 显示 2 位数字错误码
- * @param code 错误码 (10-99)
- */
-void LCD_show_error(char code) {
-    char tens, units;
-    
-    // 限制在 10-99 范围
-    if (code < 10) code = 10;
-    if (code > 99) code = 99;
-    
-    tens = (code / 10) + '0';
-    units = (code % 10) + '0';
-    
-    // 显示十位
-    LCD_dispnum(tens);
-    si47xx_delay_ms(100);
-    
-    // 显示个位
-    LCD_dispnum(units);
-    si47xx_delay_ms(100);
-}
-
-/*============================================================================
  * 测试函数
  *============================================================================*/
 
@@ -77,19 +50,22 @@ int test_i2c(void) {
     uint8_t resp;
     
     if (si47xx_hw_write(0x21, &cmd, 1) != 0) {
-        LCD_show_error(ERR_I2C_WRITE);
+        LCD_dispnum(ERR_I2C_WRITE / 10); si47xx_delay_ms(100);
+        LCD_dispnum(ERR_I2C_WRITE % 10); si47xx_delay_ms(100);
         return ERR_I2C_WRITE;
     }
     
     si47xx_delay_ms(10);
     
     if (si47xx_hw_read(0x21, &resp, 1) != 0) {
-        LCD_show_error(ERR_I2C_READ);
+        LCD_dispnum(ERR_I2C_READ / 10); si47xx_delay_ms(100);
+        LCD_dispnum(ERR_I2C_READ % 10); si47xx_delay_ms(100);
         return ERR_I2C_READ;
     }
     
     if ((resp & 0x80) == 0) {
-        LCD_show_error(ERR_I2C_TIMEOUT);
+        LCD_dispnum(ERR_I2C_TIMEOUT / 10); si47xx_delay_ms(100);
+        LCD_dispnum(ERR_I2C_TIMEOUT % 10); si47xx_delay_ms(100);
         return ERR_I2C_TIMEOUT;
     }
     
@@ -106,7 +82,8 @@ int test_init(void) {
     config.freq_max = 108000U;
     
     if (si47xx_init(&config) != SI47XX_OK) {
-        LCD_show_error(ERR_CHIP_INIT);
+        LCD_dispnum(ERR_CHIP_INIT / 10); si47xx_delay_ms(100);
+        LCD_dispnum(ERR_CHIP_INIT % 10); si47xx_delay_ms(100);
         return ERR_CHIP_INIT;
     }
     
@@ -118,7 +95,8 @@ int test_init(void) {
  */
 int test_freq(void) {
     if (si47xx_tx_set_frequency(100000U) != SI47XX_OK) {
-        LCD_show_error(ERR_FREQ_SET);
+        LCD_dispnum(ERR_FREQ_SET / 10); si47xx_delay_ms(100);
+        LCD_dispnum(ERR_FREQ_SET % 10); si47xx_delay_ms(100);
         return ERR_FREQ_SET;
     }
     return 0;
@@ -129,7 +107,8 @@ int test_freq(void) {
  */
 int test_power(void) {
     if (si47xx_tx_set_power(100) != SI47XX_OK) {
-        LCD_show_error(ERR_POWER_SET);
+        LCD_dispnum(ERR_POWER_SET / 10); si47xx_delay_ms(100);
+        LCD_dispnum(ERR_POWER_SET % 10); si47xx_delay_ms(100);
         return ERR_POWER_SET;
     }
     return 0;
@@ -165,7 +144,8 @@ int si47xx_test(void) {
     printf("Power OK\n");
     
     // 全部通过，显示 99
-    LCD_show_error(TEST_OK);
+    LCD_dispnum(TEST_OK / 10); si47xx_delay_ms(100);
+    LCD_dispnum(TEST_OK % 10); si47xx_delay_ms(100);
     printf("测试通过！\n");
     
     return 0;
