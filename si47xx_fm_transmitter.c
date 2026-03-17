@@ -279,22 +279,17 @@ si47xx_status_t si47xx_tx_set_power(uint8_t power_dbuv)
 
 si47xx_status_t si47xx_tx_enable(void)
 {
-    uint8_t cmd[10];
     si47xx_status_t status;
     
     if (!g_initialized) {
         return SI47XX_ERR_DEVICE_NOT_READY;
     }
     
-    // 先设置频率和功率
+    // 设置默认频率和功率（发射器自动启用）
     status = si47xx_tx_set_frequency(87500U);  // 默认 87.5 MHz
     if (status != SI47XX_OK) return status;
     
     status = si47xx_tx_set_power(115);  // 默认最大功率
-    if (status != SI47XX_OK) return status;
-    
-    // 通过属性启用发射
-    status = si47xx_set_property(0x3702, 115);  // FM_TX_POWER_LEVEL
     if (status != SI47XX_OK) return status;
     
     g_tx_enabled = true;
