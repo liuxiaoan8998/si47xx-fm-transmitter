@@ -130,38 +130,43 @@ GPO1  -> 天线 (RF输出)
 
 ## 硬件测试
 
-### LCD 错误码测试
+### 1. 简化版测试（2 位 LCD 屏）
 
-提供了专门的硬件测试程序，支持 3 位断码屏显示错误码：
+推荐使用简化版测试程序：
+
+- **文件**: `lcd_simple_test.c`
+- **编译**: `make lcd_simple`
+- **运行**: `./lcd_simple_test`
+- **错误码范围**: 10-99
+
+| 错误码 | 含义 |
+|--------|------|
+| 10 | I2C 写失败 |
+| 11 | I2C 读失败 |
+| 12 | I2C 超时 |
+| 20 | 芯片初始化失败 |
+| 21 | 芯片检测失败 |
+| 30 | 频率范围错误 |
+| 31 | 频率设置失败 |
+| 40 | 功率范围错误 |
+| 41 | 功率设置失败 |
+| 99 | 测试通过 |
+
+### 2. 完整版测试（3 位 LCD 屏）
+
+如果需要更详细的错误诊断：
 
 - **文件**: `lcd_test_si47xx.c`
-- **功能**: 通过 3 位 LCD 屏显示错误码，快速定位硬件问题
-- **错误码范围**: 
-  - 1xx: I2C 通信错误
-  - 2xx: 芯片初始化错误
-  - 3xx: 频率设置错误
-  - 4xx: 功率设置错误
-  - 5xx: RDS 功能错误
-  - 6xx: 音频控制错误
-  - 7xx: 属性设置错误
-  - 8xx: 配置错误
-  - 9xx: 系统错误
+- **编译**: `make lcd_test`
+- **运行**: `./test_with_lcd`
+- **错误码范围**: 101-999（详细分类）
 
-### 使用方法
+详细错误码含义参考 `LCD_HARDWARE_TEST.md` 和 `LCD_ERROR_CODES.md`。
 
-1. 实现 LCD 接口函数：
-   ```c
-   extern void LCD_dispnum(char number);  // 显示单个数字 '0'-'9'
-   ```
+### LCD 接口
 
-2. 编译测试程序：
-   ```bash
-   gcc -I. lcd_test_si47xx.c si47xx_fm_transmitter.c -o lcd_test
-   ```
-
-3. 运行测试：
-   ```bash
-   ./lcd_test
-   ```
-
-详细错误码含义请参考 `LCD_HARDWARE_TEST.md`。
+两个测试程序都需要实现：
+```c
+extern void LCD_dispnum(char number);  // 显示单个数字 '0'-'9'
+extern void si47xx_delay_ms(uint32_t ms);  // 毫秒延时
+```
