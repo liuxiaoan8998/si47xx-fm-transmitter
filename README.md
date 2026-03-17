@@ -17,11 +17,17 @@
 
 ```
 si47xx-fm-transmitter/
-├── si47xx_fm_transmitter.h   # 头文件
-├── si47xx_fm_transmitter.c   # 实现
+├── si47xx_fm_transmitter.h   # 驱动头文件
+├── si47xx_fm_transmitter.c   # 驱动实现
 ├── example_fm_transmitter.c  # 示例程序
+├── test_si47xx.c             # 单元测试
+├── lcd_simple_test.c         # 简化 LCD 测试 (2 位屏)
+├── lcd_test_si47xx.c         # 完整 LCD 测试 (3 位屏)
+├── lcd_error_display.c       # LCD 错误显示驱动
 ├── Makefile                  # 构建文件
-└── README.md                 # 说明文档
+├── README.md                 # 本说明文档
+├── LCD_ERROR_CODES.md        # 错误码速查表
+└── LCD_HARDWARE_TEST.md      # 硬件测试指南
 ```
 
 ## 快速开始
@@ -65,14 +71,12 @@ si47xx_init(&config);
 ### 设置发射
 
 ```c
-// 设置频率 (kHz)
-si47xx_tx_set_frequency(107900);  // 107.90 MHz
+// 方式 1: 分步设置
+si47xx_tx_set_frequency(107900);  // 设置频率 (kHz)
+si47xx_tx_set_power(115);         // 设置功率 (dBuV, 77-115)
 
-// 设置功率 (dBuV, 77-115)
-si47xx_tx_set_power(115);
-
-// 开启发射
-si47xx_tx_enable();
+// 方式 2: 使用 tx_enable (自动设置默认值)
+si47xx_tx_enable();  // 默认 87.5 MHz, 115 dBuV
 ```
 
 ### 音频控制
@@ -101,8 +105,35 @@ si47xx_rds_set_text("Hello FM World!");
 ## 嵌入式项目移植
 
 1. 复制 `si47xx_fm_transmitter.h` 和 `si47xx_fm_transmitter.c` 到你的项目
-2. 实现硬件接口函数
+2. 实现硬件接口函数：
+   ```c
+   int si47xx_hw_write(uint8_t addr, const uint8_t *data, uint16_t len);
+   int si47xx_hw_read(uint8_t addr, uint8_t *data, uint16_t len);
+   void si47xx_delay_ms(uint32_t ms);
+   ```
 3. 调用 API 进行操作
+
+### 典型使用流程
+
+```c
+// 1. 初始化
+si47xx_config_t config = {0};
+config.band = BAND_US_EU;
+config.freq_min = 87500U;
+config.freq_max = 108000U;
+si47xx_init(&config);
+
+// 2. 设置频率和功率
+si47xx_tx_set_frequency(107900U);  // 107.9 MHz
+si47xx_tx_set_power(100);          // 100 dBuV
+
+// 3. 可选：配置音频
+si47xx_audio_set_volume(80);
+
+// 4. 可选：RDS (仅 Si4711/13/21)
+si47xx_rds_enable();
+si47xx_rds_set_pi(0x1234, "MY_FM");
+```
 
 ## 硬件连接
 
